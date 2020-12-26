@@ -1,23 +1,27 @@
+import { OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create.user.dto';
+import { DbService } from '../db.service';
+import { Env } from '../utils/env';
+import { Repository } from 'typeorm';
 import { User } from './users.entity';
-
-export class UsersService {
+export class UsersService extends DbService<User> implements OnModuleInit {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
-  ) {}
-
-  async findOne(id: string) {
-    return this.userRepository.findOne(id);
+    userRepository: Repository<User>,
+  ) {
+    super(userRepository);
   }
 
-  async findOneBy(query: FindConditions<User>) {
-    return this.userRepository.findOne(query);
-  }
+  async onModuleInit() {
+    if (Env.isNOTDev()) return;
 
-  async create(user: CreateUserDto) {
-    return this.userRepository.insert(user);
+    const bcrypt = await import('bcryptjs');
+
+    this.create({
+      fullName: '@HHP',
+      isActive: true,
+      username: 'username',
+      password: await bcrypt.hash('password', Env.HASH_ROUNDS),
+    });
   }
 }
