@@ -23,7 +23,7 @@ export class PostsService extends DbService<Post> implements OnModuleInit {
     await this.migrateAllPosts();
   }
 
-  async migrateAllPosts(limit = 100) {
+  async migrateAllPosts(limit = 10) {
     console.time('POSTS_MIGRATION');
 
     if (Env.isDev()) {
