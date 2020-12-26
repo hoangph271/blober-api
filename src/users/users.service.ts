@@ -17,7 +17,9 @@ export class UsersService extends DbService<User> implements OnModuleInit {
 
     const bcrypt = await import('bcryptjs');
 
-    this.create({
+    await this.DANGEROUS_deleteAll();
+
+    await this.create({
       fullName: '@HHP',
       isActive: true,
       username: 'username',
