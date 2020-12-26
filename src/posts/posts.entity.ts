@@ -1,5 +1,5 @@
 import { IsPositive } from 'class-validator';
-import { Pic } from 'src/pics/pics.entity';
+import { Pic } from '../pics/pics.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()

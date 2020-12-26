@@ -1,7 +1,7 @@
 import { Injectable, Request } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 
 export class AuthPayload {
   uuid: string;
