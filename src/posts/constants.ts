@@ -1,1 +1,1 @@
-export const PAGE_LIMIT = 20;
+export const DEFAULT_TAKE_COUNT = 20;

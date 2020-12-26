@@ -19,4 +19,8 @@ export class Post {
 
   @OneToMany(() => Pic, (pic) => pic.post)
   pics: Pic[];
+
+  static relations = {
+    pics: 'pics',
+  };
 }

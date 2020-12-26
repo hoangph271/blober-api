@@ -1,6 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PAGE_LIMIT } from './constants';
+import { DEFAULT_TAKE_COUNT } from './constants';
+import { Post } from './posts.entity';
 import { PostsService } from './posts.service';
 
 @Controller('posts')
@@ -11,12 +12,16 @@ export class PostsController {
   @UseGuards(JwtAuthGuard)
   async findPosts(
     @Query('skip') skip = 0,
-    @Query('limit') limit: number = PAGE_LIMIT,
+    @Query('take') take: number = DEFAULT_TAKE_COUNT,
   ) {
     // TODO: https://github.com/nestjs/nest/issues/4713
     // * Validate skip & limit
     // * For now, the server dies when skip or limit is NOT a number
-    const posts = await this.postsService.findManyBy(null, skip, limit);
+    const posts = await this.postsService.findManyBy({
+      skip,
+      take,
+      relations: [Post.relations.pics],
+    });
 
     return {
       count: posts.length,

@@ -12,4 +12,8 @@ export class Env {
   static isNOTDev() {
     return Env.STAGE !== APP_STAGES.DEV;
   }
+
+  static isDev() {
+    return !Env.isNOTDev();
+  }
 }

@@ -20,8 +20,15 @@ export class PostsService extends DbService<Post> implements OnModuleInit {
   async onModuleInit() {
     if (Env.isNOTDev()) return;
 
+    await this.migrateAllPosts();
+  }
+
+  async migrateAllPosts(limit = 100) {
     console.time('POSTS_MIGRATION');
-    await this.DANGEROUS_deleteAll();
+
+    if (Env.isDev()) {
+      await this.DANGEROUS_deleteAll();
+    }
 
     const path = await import('path');
     const fs = await import('fs/promises');
@@ -33,7 +40,7 @@ export class PostsService extends DbService<Post> implements OnModuleInit {
     const THREADS_PER_CPU = 4;
     const limiter = pLimit(os.cpus().length * THREADS_PER_CPU);
 
-    const postDirs = await fs.readdir(POST_DIR);
+    const postDirs = (await fs.readdir(POST_DIR)).slice(0, limit);
 
     await Promise.all([
       ...postDirs.map((dirName) =>
@@ -58,16 +65,19 @@ export class PostsService extends DbService<Post> implements OnModuleInit {
             },
           });
 
-          const { raw: uuid } = await this.create({
+          const { identifiers } = await this.create({
             title,
             dirName,
             picsCount,
           });
+          const { uuid } = identifiers[0] as any;
 
           await Promise.all(
             picPaths.map(async (picPath) => {
-              await this.picRepository.create({
-                fileName: path.basename(picPath),
+              const fileName = path.basename(picPath);
+
+              await this.picRepository.insert({
+                fileName,
                 post: { uuid },
                 fileSize: (await fs.stat(picPath)).size,
               });
@@ -84,18 +94,14 @@ export class PostsService extends DbService<Post> implements OnModuleInit {
 
 type okOrDefaultParams = {
   func(): void;
-  onError(error: Error): void;
+  onError?(error: Error): void;
   defaultValue?: any;
 };
-function okOrDefault({
-  func,
-  onError = () => {},
-  defaultValue = {},
-}: okOrDefaultParams) {
+function okOrDefault({ func, onError, defaultValue = {} }: okOrDefaultParams) {
   try {
     return func();
   } catch (error) {
-    onError(error);
+    onError && onError(error);
     return defaultValue;
   }
 }

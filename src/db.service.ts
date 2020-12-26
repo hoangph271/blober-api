@@ -1,4 +1,4 @@
-import { FindConditions, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 type PartialEntity<T> = QueryDeepPartialEntity<T>;
@@ -13,12 +13,8 @@ export abstract class DbService<Entity> {
     return this.entityRepository.findOne(where);
   }
 
-  async findManyBy(where: FindConditions<Entity>, skip = 0, take: number) {
-    return this.entityRepository.find({
-      skip,
-      take,
-      where,
-    });
+  async findManyBy(where: FindManyOptions<Entity>) {
+    return this.entityRepository.find(where);
   }
 
   async create(entity: PartialEntity<Entity>) {
