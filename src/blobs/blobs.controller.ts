@@ -24,7 +24,10 @@ export class BlobsController {
 
     if (!blob) throw new NotFoundException();
 
-    return blob;
+    return {
+      ...blob,
+      metadata: JSON.parse(blob.metadata)
+    };
   }
 
   @Get('raw/:uuid')
@@ -41,34 +44,41 @@ export class BlobsController {
     const blobStream = await this.blobsService.createReadStream(blob);
 
     if (!blobStream) throw new NotFoundException();
+    res.setHeader('Content-Disposition', `attachment; filename="${blob.fileName}"`);
 
-    if (!size) {
-      const imageType = path.extname(blob.blobPath).slice(1);
-      res.setHeader('Content-Type', `image/${imageType}`);
-      blobStream.pipe(res);
-      return;
+    switch (true) {
+      case blob.contentType.startsWith('image'): {
+        size = size || JSON.parse(blob.metadata).size;
+
+        const [width, height] = size ? size.split('x').map(Number) : [];
+
+        const ws = await createResizedPic(blobStream, { width, height });
+        res.setHeader('Content-Type', 'image/webp');
+        ws.pipe(res);
+
+        break;
+      }
+      default: {
+        res.setHeader('Content-Type', 'application/octet-stream');
+        blobStream.pipe(res);
+      }
     }
-
-    const [width, height] = size.split('x').map(Number);
-    const ws = await this.createResizedPic(blobStream, { width, height });
-    res.setHeader('Content-Type', `image/webp`);
-    ws.pipe(res);
   }
+}
 
-  private async createResizedPic(
-    blobStream: ReadStream,
-    { width, height }: ImageSize,
-  ) {
-    const resizer = sharp()
-      .resize({
-        fit: sharp.fit.cover,
-        width,
-        height,
-      })
-      .webp();
+async function createResizedPic(
+  blobStream: ReadStream,
+  { width, height }: ImageSize,
+) {
+  const resizer = sharp()
+    .resize({
+      fit: sharp.fit.cover,
+      width,
+      height,
+    })
+    .webp();
 
-    return blobStream.pipe(resizer);
-  }
+  return blobStream.pipe(resizer);
 }
 
 type ImageSize = {

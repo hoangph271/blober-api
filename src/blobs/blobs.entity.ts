@@ -11,5 +11,14 @@ export class Blob {
   blobPath: string;
 
   @Column()
+  fileName: string
+
+  @Column()
+  contentType: string;
+
+  @Column()
   fileSize: number;
+
+  @Column({ default: '{}' })
+  metadata: string;
 }
