@@ -19,7 +19,7 @@ export class PicsService extends DbService<Pic> implements OnModuleInit {
     if (Env.needsResetDb()) await this.DANGEROUS_deleteAll();
   }
 
-  async createReadStream(pic: Pic): Promise<fs.ReadStream | null> {
+  async createPicsReadStream(pic: Pic): Promise<fs.ReadStream | null> {
     return fs.promises
       .access(pic.filePath, fs.constants.R_OK)
       .then(() => fs.createReadStream(pic.filePath))

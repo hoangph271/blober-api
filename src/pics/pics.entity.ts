@@ -14,6 +14,6 @@ export class Pic {
   @Column()
   fileSize: number;
 
-  @ManyToOne(() => Album, album => album.pics)
+  @ManyToOne(() => Album, (album) => album.pics)
   album: Album;
 }
