@@ -13,17 +13,21 @@ export class UsersService extends DbService<User> implements OnModuleInit {
   }
 
   async onModuleInit() {
-    if (Env.isNOTDev()) return;
+    if (Env.needsResetDb()) {
+      const bcrypt = await import('bcryptjs');
 
-    const bcrypt = await import('bcryptjs');
+      await this.DANGEROUS_deleteAll();
 
-    await this.DANGEROUS_deleteAll();
+      const username = 'username';
+      const user = await this.findOneBy({ username });
+      if (user) return;
 
-    await this.create({
-      fullName: '@HHP',
-      isActive: true,
-      username: 'username',
-      password: await bcrypt.hash('password', Env.HASH_ROUNDS),
-    });
+      await this.create({
+        username,
+        fullName: 'fullName',
+        isActive: true,
+        password: await bcrypt.hash('password', Env.HASH_ROUNDS),
+      });
+    }
   }
 }

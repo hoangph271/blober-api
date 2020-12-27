@@ -18,17 +18,13 @@ export class PostsService extends DbService<Post> implements OnModuleInit {
   }
 
   async onModuleInit() {
-    if (Env.isNOTDev()) return;
-
-    await this.migrateAllPosts();
+    if (Env.needsResetDb()) await this.migrateAllPosts();
   }
 
   async migrateAllPosts(limit = 10) {
     console.time('POSTS_MIGRATION');
 
-    if (Env.isDev()) {
-      await this.DANGEROUS_deleteAll();
-    }
+    await this.DANGEROUS_deleteAll();
 
     const path = await import('path');
     const fs = await import('fs/promises');
@@ -73,13 +69,11 @@ export class PostsService extends DbService<Post> implements OnModuleInit {
           const { uuid } = identifiers[0] as any;
 
           await Promise.all(
-            picPaths.map(async (picPath) => {
-              const fileName = path.basename(picPath);
-
+            picPaths.map(async (filePath) => {
               await this.picRepository.insert({
-                fileName,
+                filePath,
                 post: { uuid },
-                fileSize: (await fs.stat(picPath)).size,
+                fileSize: (await fs.stat(filePath)).size,
               });
             }),
           );
