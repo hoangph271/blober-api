@@ -13,6 +13,7 @@ export class PostsController {
   async findPosts(
     @Query('skip') skip = 0,
     @Query('take') take: number = DEFAULT_TAKE_COUNT,
+    @Query('withPics') withPics = false,
   ) {
     // TODO: https://github.com/nestjs/nest/issues/4713
     // * Validate skip & limit
@@ -20,7 +21,7 @@ export class PostsController {
     const posts = await this.postsService.findManyBy({
       skip,
       take,
-      relations: [Post.relations.pics],
+      relations: withPics ? [Post.relations.pics] : [],
     });
 
     return {
