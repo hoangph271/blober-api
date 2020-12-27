@@ -5,8 +5,8 @@ type PartialEntity<T> = QueryDeepPartialEntity<T>;
 export abstract class DbService<Entity> {
   constructor(private entityRepository: Repository<Entity>) {}
 
-  async findOne(id: string) {
-    return this.entityRepository.findOne(id);
+  async findOne(uuid: string) {
+    return this.entityRepository.findOne(uuid);
   }
 
   async findOneBy(where: FindConditions<Entity>) {
