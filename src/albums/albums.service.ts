@@ -1,24 +1,27 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DbService } from '../db.service';
-import { Pic } from '../pics/pics.entity';
+import { Blob } from '../blobs/blobs.entity';
 import { Env } from '../utils/env';
 import { Repository } from 'typeorm';
 import { Album } from './albums.entity';
+import { AlbumPic } from './albums.pic.entity';
 
 @Injectable()
 export class AlbumsService extends DbService<Album> implements OnModuleInit {
   constructor(
     @InjectRepository(Album)
     albumRepository: Repository<Album>,
-    @InjectRepository(Pic)
-    private picRepository: Repository<Pic>,
+    @InjectRepository(Blob)
+    private blobRepository: Repository<Blob>,
+    @InjectRepository(AlbumPic)
+    private albumPicsRepository: Repository<AlbumPic>,
   ) {
     super(albumRepository);
   }
 
   async onModuleInit() {
-    if (Env.needsResetDb()) await this.migrateAllAlbums();
+    if (Env.NEEDS_RESET_DB) await this.migrateAllAlbums();
   }
 
   async migrateAllAlbums(limit = 10) {
@@ -41,10 +44,6 @@ export class AlbumsService extends DbService<Album> implements OnModuleInit {
     await Promise.all([
       ...albumDirs.map((dirName) =>
         limiter(async () => {
-          const dbAlbum = await this.findOneBy({ dirName });
-
-          if (dbAlbum) return;
-
           const dirPath = path.join(ALBUM_DIR, dirName);
           const dataPath = path.join(dirPath, DATA_FILE);
           const picPaths = (await fs.readdir(dirPath))
@@ -63,20 +62,27 @@ export class AlbumsService extends DbService<Album> implements OnModuleInit {
 
           const { identifiers } = await this.create({
             title,
-            dirName,
             picsCount,
           });
-          const { uuid } = identifiers[0] as any;
 
-          await Promise.all(
-            picPaths.map(async (filePath) => {
-              await this.picRepository.insert({
-                filePath,
-                album: { uuid },
-                fileSize: (await fs.stat(filePath)).size,
-              });
-            }),
-          );
+          const [{ uuid: albumUuid }] = identifiers;
+
+          const insertPromises = picPaths.map(async (blobPath) => {
+            const {
+              identifiers: [{ uuid: blobUuid }],
+            } = await this.blobRepository.insert({
+              blobPath,
+              fileSize: (await fs.stat(blobPath)).size,
+            });
+
+            await this.albumPicsRepository.insert({
+              album: { uuid: albumUuid },
+              blobUuid,
+              title: path.basename(blobPath),
+            });
+          });
+
+          await Promise.all(insertPromises);
         }),
       ),
     ]);

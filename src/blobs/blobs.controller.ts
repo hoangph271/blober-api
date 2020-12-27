@@ -11,52 +11,52 @@ import {
 import { Response } from 'express';
 import * as sharp from 'sharp';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { PicsService } from './pics.service';
+import { BlobsService } from './blobs.service';
 import { ReadStream } from 'typeorm/platform/PlatformTools';
 
-@Controller('pics')
-export class PicsController {
-  constructor(private picsService: PicsService) {}
+@Controller('blobs')
+export class BlobsController {
+  constructor(private blobsService: BlobsService) {}
   @Get(':uuid')
   @UseGuards(JwtAuthGuard)
-  async findPic(@Param('uuid') uuid: string) {
-    const pic = await this.picsService.findOne(uuid);
+  async findBlob(@Param('uuid') uuid: string) {
+    const blob = await this.blobsService.findOne(uuid);
 
-    if (!pic) throw new NotFoundException();
+    if (!blob) throw new NotFoundException();
 
-    return pic;
+    return blob;
   }
 
   @Get('raw/:uuid')
   @UseGuards(JwtAuthGuard)
-  async readRawPic(
+  async readBlob(
     @Param('uuid') uuid: string,
     @Query('size') size: string,
     @Res() res: Response,
   ) {
-    const pic = await this.picsService.findOne(uuid);
+    const blob = await this.blobsService.findOne(uuid);
 
-    if (!pic) throw new NotFoundException();
+    if (!blob) throw new NotFoundException();
 
-    const picStream = await this.picsService.createPicsReadStream(pic);
+    const blobStream = await this.blobsService.createReadStream(blob);
 
-    if (!picStream) throw new NotFoundException();
+    if (!blobStream) throw new NotFoundException();
 
     if (!size) {
-      const imageType = path.extname(pic.filePath).slice(1);
+      const imageType = path.extname(blob.blobPath).slice(1);
       res.setHeader('Content-Type', `image/${imageType}`);
-      picStream.pipe(res);
+      blobStream.pipe(res);
       return;
     }
 
     const [width, height] = size.split('x').map(Number);
-    const ws = await this.createResizedPic(picStream, { width, height });
+    const ws = await this.createResizedPic(blobStream, { width, height });
     res.setHeader('Content-Type', `image/webp`);
     ws.pipe(res);
   }
 
   private async createResizedPic(
-    picStream: ReadStream,
+    blobStream: ReadStream,
     { width, height }: ImageSize,
   ) {
     const resizer = sharp()
@@ -67,7 +67,7 @@ export class PicsController {
       })
       .webp();
 
-    return picStream.pipe(resizer);
+    return blobStream.pipe(resizer);
   }
 }
 

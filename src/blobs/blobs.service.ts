@@ -3,26 +3,26 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as fs from 'fs';
 import { DbService } from '../db.service';
 import { Repository } from 'typeorm';
-import { Pic } from './pics.entity';
+import { Blob } from './blobs.entity';
 import { Env } from '../utils/env';
 
 @Injectable()
-export class PicsService extends DbService<Pic> implements OnModuleInit {
+export class BlobsService extends DbService<Blob> implements OnModuleInit {
   constructor(
-    @InjectRepository(Pic)
-    picRepository: Repository<Pic>,
+    @InjectRepository(Blob)
+    picRepository: Repository<Blob>,
   ) {
     super(picRepository);
   }
 
   async onModuleInit() {
-    if (Env.needsResetDb()) await this.DANGEROUS_deleteAll();
+    if (Env.NEEDS_RESET_DB) await this.DANGEROUS_deleteAll();
   }
 
-  async createPicsReadStream(pic: Pic): Promise<fs.ReadStream | null> {
+  async createReadStream(blob: Blob): Promise<fs.ReadStream | null> {
     return fs.promises
-      .access(pic.filePath, fs.constants.R_OK)
-      .then(() => fs.createReadStream(pic.filePath))
+      .access(blob.blobPath, fs.constants.R_OK)
+      .then(() => fs.createReadStream(blob.blobPath))
       .catch((error) => {
         console.info(error);
         return null;
