@@ -46,6 +46,7 @@ export class PicsController {
       const imageType = path.extname(pic.filePath).slice(1);
       res.setHeader('Content-Type', `image/${imageType}`);
       picStream.pipe(res);
+      return;
     }
 
     const [width, height] = size.split('x').map(Number);
