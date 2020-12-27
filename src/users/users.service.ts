@@ -13,7 +13,7 @@ export class UsersService extends DbService<User> implements OnModuleInit {
   }
 
   async onModuleInit() {
-    if (Env.needsResetDb()) {
+    if (Env.NEEDS_RESET_DB) {
       const bcrypt = await import('bcryptjs');
 
       await this.DANGEROUS_deleteAll();

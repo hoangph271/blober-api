@@ -1,6 +1,12 @@
 import { IsPositive } from 'class-validator';
-import { Pic } from '../pics/pics.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { AlbumPic } from './albums.pic.entity';
 
 @Entity()
 export class Album {
@@ -11,16 +17,10 @@ export class Album {
   title: string;
 
   @Column()
-  dirName: string;
-
-  @Column()
   @IsPositive()
   picsCount: number;
 
-  @OneToMany(() => Pic, (pic) => pic.album)
-  pics: Pic[];
-
-  static relations = {
-    pics: 'pics',
-  };
+  @OneToMany(() => AlbumPic, (albumPic) => albumPic.album, { eager: true })
+  @JoinTable()
+  pics: AlbumPic[];
 }
