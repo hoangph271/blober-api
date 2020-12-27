@@ -1,7 +1,6 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { Env } from '../utils/env';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Album } from './albums.entity';
 import { AlbumsService } from './albums.service';
 
 @Controller('albums')

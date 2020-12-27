@@ -5,7 +5,7 @@ export enum APP_STAGES {
   DEV,
 }
 
-const USE_MEMORY_DB = 1;
+const USE_MEMORY_DB = process.env.USE_MEMORY_DB || 1;
 const SQLITE_DB_FILE = 'pussies.db';
 const NOT_EXISTS_DB_FILE = !fs.existsSync(SQLITE_DB_FILE);
 

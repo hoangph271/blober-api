@@ -32,6 +32,7 @@ export class AlbumsService extends DbService<Album> implements OnModuleInit {
     const path = await import('path');
     const fs = await import('fs/promises');
     const os = await import('os');
+    const sharp = (await import('sharp')) as any;
     const pLimit = ((await import('p-limit')) as unknown) as CallableFunction;
 
     const ALBUM_DIR = 'Z:\\useShared\\useBad\\_savior\\posts';
@@ -68,16 +69,19 @@ export class AlbumsService extends DbService<Album> implements OnModuleInit {
           const [{ uuid: albumUuid }] = identifiers;
 
           const insertPromises = picPaths.map(async (blobPath) => {
-            const {
-              identifiers: [{ uuid: blobUuid }],
-            } = await this.blobRepository.insert({
+            const { format, width, height } = await sharp(blobPath).metadata();
+            const contentType = `image/${format}`;
+            const { identifiers } = await this.blobRepository.insert({
               blobPath,
+              fileName: path.basename(blobPath),
               fileSize: (await fs.stat(blobPath)).size,
+              contentType,
+              metadata: JSON.stringify({ size: `${width}x${height}` }),
             });
 
             await this.albumPicsRepository.insert({
               album: { uuid: albumUuid },
-              blobUuid,
+              blobUuid: identifiers[0].uuid,
               title: path.basename(blobPath),
             });
           });
