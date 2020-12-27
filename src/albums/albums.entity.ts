@@ -3,7 +3,7 @@ import { Pic } from '../pics/pics.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class Post {
+export class Album {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
@@ -17,7 +17,7 @@ export class Post {
   @IsPositive()
   picsCount: number;
 
-  @OneToMany(() => Pic, (pic) => pic.post)
+  @OneToMany(() => Pic, (pic) => pic.album)
   pics: Pic[];
 
   static relations = {

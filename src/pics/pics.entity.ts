@@ -1,4 +1,4 @@
-import { Post } from '../posts/posts.entity';
+import { Album } from '../albums/albums.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { IsNotEmpty } from 'class-validator';
 
@@ -14,6 +14,6 @@ export class Pic {
   @Column()
   fileSize: number;
 
-  @ManyToOne(() => Post, (post) => post.pics)
-  post: Post;
+  @ManyToOne(() => Album, album => album.pics)
+  album: Album;
 }

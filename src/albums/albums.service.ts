@@ -4,25 +4,25 @@ import { DbService } from '../db.service';
 import { Pic } from '../pics/pics.entity';
 import { Env } from '../utils/env';
 import { Repository } from 'typeorm';
-import { Post } from './posts.entity';
+import { Album } from './albums.entity';
 
 @Injectable()
-export class PostsService extends DbService<Post> implements OnModuleInit {
+export class AlbumsService extends DbService<Album> implements OnModuleInit {
   constructor(
-    @InjectRepository(Post)
-    postRepository: Repository<Post>,
+    @InjectRepository(Album)
+    albumRepository: Repository<Album>,
     @InjectRepository(Pic)
     private picRepository: Repository<Pic>,
   ) {
-    super(postRepository);
+    super(albumRepository);
   }
 
   async onModuleInit() {
-    if (Env.needsResetDb()) await this.migrateAllPosts();
+    if (Env.needsResetDb()) await this.migrateAllAlbums();
   }
 
-  async migrateAllPosts(limit = 10) {
-    console.time('POSTS_MIGRATION');
+  async migrateAllAlbums(limit = 10) {
+    console.time('ALBUMS_MIGRATION');
 
     await this.DANGEROUS_deleteAll();
 
@@ -31,21 +31,21 @@ export class PostsService extends DbService<Post> implements OnModuleInit {
     const os = await import('os');
     const pLimit = ((await import('p-limit')) as unknown) as CallableFunction;
 
-    const POST_DIR = 'Z:\\useShared\\useBad\\_savior\\posts';
+    const ALBUM_DIR = 'Z:\\useShared\\useBad\\_savior\\posts';
     const DATA_FILE = 'info.json';
     const THREADS_PER_CPU = 4;
     const limiter = pLimit(os.cpus().length * THREADS_PER_CPU);
 
-    const postDirs = (await fs.readdir(POST_DIR)).slice(0, limit);
+    const albumDirs = (await fs.readdir(ALBUM_DIR)).slice(0, limit);
 
     await Promise.all([
-      ...postDirs.map((dirName) =>
+      ...albumDirs.map((dirName) =>
         limiter(async () => {
-          const dbPost = await this.findOneBy({ dirName });
+          const dbAlbum = await this.findOneBy({ dirName });
 
-          if (dbPost) return;
+          if (dbAlbum) return;
 
-          const dirPath = path.join(POST_DIR, dirName);
+          const dirPath = path.join(ALBUM_DIR, dirName);
           const dataPath = path.join(dirPath, DATA_FILE);
           const picPaths = (await fs.readdir(dirPath))
             .filter((fileName) => fileName !== DATA_FILE)
@@ -72,7 +72,7 @@ export class PostsService extends DbService<Post> implements OnModuleInit {
             picPaths.map(async (filePath) => {
               await this.picRepository.insert({
                 filePath,
-                post: { uuid },
+                album: { uuid },
                 fileSize: (await fs.stat(filePath)).size,
               });
             }),
@@ -81,8 +81,8 @@ export class PostsService extends DbService<Post> implements OnModuleInit {
       ),
     ]);
 
-    console.info('All `posts` migration finished...!');
-    console.timeEnd('POSTS_MIGRATION');
+    console.info('All `albums` migration finished...!');
+    console.timeEnd('ALBUMS_MIGRATION');
   }
 }
 
