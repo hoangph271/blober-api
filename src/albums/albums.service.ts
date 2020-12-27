@@ -6,6 +6,7 @@ import { Env } from '../utils/env';
 import { Repository } from 'typeorm';
 import { Album } from './albums.entity';
 import { AlbumPic } from './albums.pic.entity';
+import { imageMetadata } from 'src/utils/image';
 
 @Injectable()
 export class AlbumsService extends DbService<Album> implements OnModuleInit {
@@ -32,7 +33,6 @@ export class AlbumsService extends DbService<Album> implements OnModuleInit {
     const path = await import('path');
     const fs = await import('fs/promises');
     const os = await import('os');
-    const sharp = (await import('sharp')) as any;
     const pLimit = ((await import('p-limit')) as unknown) as CallableFunction;
 
     const ALBUM_DIR = 'Z:\\useShared\\useBad\\_savior\\posts';
@@ -69,7 +69,7 @@ export class AlbumsService extends DbService<Album> implements OnModuleInit {
           const [{ uuid: albumUuid }] = identifiers;
 
           const insertPromises = picPaths.map(async (blobPath) => {
-            const { format, width, height } = await sharp(blobPath).metadata();
+            const { format, width, height } = await imageMetadata(blobPath);
             const contentType = `image/${format}`;
             const { identifiers } = await this.blobRepository.insert({
               blobPath,

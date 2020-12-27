@@ -11,7 +11,7 @@ export class Blob {
   blobPath: string;
 
   @Column()
-  fileName: string
+  fileName: string;
 
   @Column()
   contentType: string;
