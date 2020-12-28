@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DbService } from '../db.service';
 import { Repository } from 'typeorm';
 import { User } from './users.entity';
-import { HASH_ROUNDS } from '../utils/env';
+import { HASH_ROUNDS, NEEDS_RESET_DB } from '../utils/env';
 export class UsersService extends DbService<User> implements OnModuleInit {
   constructor(
     @InjectRepository(User)
@@ -13,7 +13,7 @@ export class UsersService extends DbService<User> implements OnModuleInit {
   }
 
   async onModuleInit() {
-    if (Env.NEEDS_RESET_DB) {
+    if (NEEDS_RESET_DB) {
       const bcrypt = await import('bcryptjs');
 
       await this.DANGEROUS_deleteAll();
