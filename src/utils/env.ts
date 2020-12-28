@@ -1,22 +1,17 @@
-import * as fs from 'fs';
-import { Injectable } from '@nestjs/common';
-
 export enum APP_STAGES {
   DEV,
 }
 
-const USE_MEMORY_DB = process.env.USE_MEMORY_DB || 1;
-const SQLITE_DB_FILE = 'pussies.db';
-const NOT_EXISTS_DB_FILE = !fs.existsSync(SQLITE_DB_FILE);
+export const {
+  USE_MEMORY_DB,
+  SQLITE_DB_FILE = 'pussies.db',
+  NEEDS_RESET_DB = process.env.NEEDS_RESET_DB || USE_MEMORY_DB,
+} = process.env
 
-@Injectable()
-export class Env {
-  static HASH_ROUNDS = 12;
-  static STAGE = APP_STAGES.DEV;
-  static DEFAULT_TAKE_COUNT = 20;
-  static DATABASE = USE_MEMORY_DB ? ':memory:' : SQLITE_DB_FILE;
-  static JWT_SECRET = 'JWT_SECRET';
-  static JWT_EXPIRES = '365d';
-  static NEEDS_RESET_DB =
-    USE_MEMORY_DB || NOT_EXISTS_DB_FILE || process.env.NEEDS_RESET_DB;
-}
+
+export const HASH_ROUNDS = 12;
+export const STAGE = APP_STAGES.DEV;
+export const DEFAULT_TAKE_COUNT = 20;
+export const DATABASE = USE_MEMORY_DB ? ':memory:' : SQLITE_DB_FILE;
+export const JWT_SECRET = 'JWT_SECRET';
+export const JWT_EXPIRES = '365d';

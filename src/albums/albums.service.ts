@@ -2,11 +2,11 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DbService } from '../db.service';
 import { Blob } from '../blobs/blobs.entity';
-import { Env } from '../utils/env';
 import { Repository } from 'typeorm';
 import { Album } from './albums.entity';
 import { AlbumPic } from './albums.pic.entity';
-import { imageMetadata } from 'src/utils/image';
+import { imageMetadata } from '../utils/image';
+import { NEEDS_RESET_DB } from '../utils/env';
 
 @Injectable()
 export class AlbumsService extends DbService<Album> implements OnModuleInit {
@@ -22,7 +22,7 @@ export class AlbumsService extends DbService<Album> implements OnModuleInit {
   }
 
   async onModuleInit() {
-    if (Env.NEEDS_RESET_DB) await this.migrateAllAlbums();
+    if (NEEDS_RESET_DB) await this.migrateAllAlbums();
   }
 
   async migrateAllAlbums(limit = 10) {

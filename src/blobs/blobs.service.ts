@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { DbService } from '../db.service';
 import { Repository } from 'typeorm';
 import { Blob } from './blobs.entity';
-import { Env } from '../utils/env';
+import { NEEDS_RESET_DB } from '../utils/env';
 
 @Injectable()
 export class BlobsService extends DbService<Blob> implements OnModuleInit {
@@ -16,7 +16,7 @@ export class BlobsService extends DbService<Blob> implements OnModuleInit {
   }
 
   async onModuleInit() {
-    if (Env.NEEDS_RESET_DB) await this.DANGEROUS_deleteAll();
+    if (NEEDS_RESET_DB) await this.DANGEROUS_deleteAll();
   }
 
   async createReadStream(blob: Blob): Promise<fs.ReadStream | null> {

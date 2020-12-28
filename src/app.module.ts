@@ -7,12 +7,12 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AlbumsModule } from './albums/albums.module';
 import { BlobsModule } from './blobs/blobs.module';
-import { Env } from './utils/env';
 import { AlbumPic } from './albums/albums.pic.entity';
+import { DATABASE } from './utils/env';
 
 const dbConfigs: TypeOrmModuleOptions = {
   type: 'sqlite',
-  database: Env.DATABASE,
+  database: DATABASE,
   synchronize: true,
   entities: [User, Album, Blob, AlbumPic],
 };

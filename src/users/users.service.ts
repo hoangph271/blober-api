@@ -1,9 +1,9 @@
 import { OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DbService } from '../db.service';
-import { Env } from '../utils/env';
 import { Repository } from 'typeorm';
 import { User } from './users.entity';
+import { HASH_ROUNDS } from '../utils/env';
 export class UsersService extends DbService<User> implements OnModuleInit {
   constructor(
     @InjectRepository(User)
@@ -26,7 +26,7 @@ export class UsersService extends DbService<User> implements OnModuleInit {
         username,
         fullName: 'fullName',
         isActive: true,
-        password: await bcrypt.hash('password', Env.HASH_ROUNDS),
+        password: await bcrypt.hash('password', HASH_ROUNDS),
       });
     }
   }

@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { resizeImageStream } from 'src/utils/image';
+import { resizeImageStream } from '../utils/image';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BlobsService } from './blobs.service';
 

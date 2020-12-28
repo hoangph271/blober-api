@@ -10,8 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
+import { HASH_ROUNDS } from '../utils/env';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { Env } from '../utils/env';
 import { CreateUserDto } from './dto/create.user.dto';
 import { UserDto } from './dto/user.dto';
 import { UsersService } from './users.service';
@@ -42,7 +42,7 @@ export class UsersController {
 
     const { generatedMaps, raw: insertCount } = await this.usersService.create({
       ...createUserDto,
-      password: await bcrypt.hash(password, Env.HASH_ROUNDS),
+      password: await bcrypt.hash(password, HASH_ROUNDS),
     });
 
     if (!insertCount)

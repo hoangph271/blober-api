@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { Env } from '../utils/env';
+import { DEFAULT_TAKE_COUNT } from '../utils/env';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AlbumsService } from './albums.service';
 
@@ -11,7 +11,7 @@ export class AlbumsController {
   @UseGuards(JwtAuthGuard)
   async findAlbums(
     @Query('skip') skip = '0',
-    @Query('take') take = Env.DEFAULT_TAKE_COUNT,
+    @Query('take') take = DEFAULT_TAKE_COUNT,
   ) {
     const albums = await this.albumsService.findManyBy({
       skip: Number(skip),
