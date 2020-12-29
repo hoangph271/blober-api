@@ -7,6 +7,7 @@ import { Album } from './albums.entity';
 import { AlbumPic } from './albums.pic.entity';
 import { imageMetadata } from '../utils/image';
 import { NEEDS_RESET_DB } from '../utils/env';
+import { okOrDefault } from '../utils/helper';
 
 @Injectable()
 export class AlbumsService extends DbService<Album> implements OnModuleInit {
@@ -25,7 +26,7 @@ export class AlbumsService extends DbService<Album> implements OnModuleInit {
     if (NEEDS_RESET_DB) await this.migrateAllAlbums();
   }
 
-  async migrateAllAlbums(limit = 10) {
+  async migrateAllAlbums(limit = 1000) {
     console.time('ALBUMS_MIGRATION');
 
     await this.DANGEROUS_deleteAll();
@@ -93,19 +94,5 @@ export class AlbumsService extends DbService<Album> implements OnModuleInit {
 
     console.info('All `albums` migration finished...!');
     console.timeEnd('ALBUMS_MIGRATION');
-  }
-}
-
-type okOrDefaultParams = {
-  func(): void;
-  onError?(error: Error): void;
-  defaultValue?: any;
-};
-function okOrDefault({ func, onError, defaultValue = {} }: okOrDefaultParams) {
-  try {
-    return func();
-  } catch (error) {
-    onError && onError(error);
-    return defaultValue;
   }
 }

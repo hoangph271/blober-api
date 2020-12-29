@@ -7,7 +7,6 @@ export class AuthPayload {
   uuid: string;
   roles: string[];
 }
-
 @Injectable()
 export class AuthService {
   constructor(

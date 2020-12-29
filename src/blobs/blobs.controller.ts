@@ -51,7 +51,9 @@ export class BlobsController {
       case blob.contentType.startsWith('image'): {
         size = size || JSON.parse(blob.metadata).size;
 
-        const [width, height] = size ? size.split('x').map(Number) : [];
+        const [width, height] = size
+          ? size.split('x').map(val => val ? Number(val) : undefined)
+          : [];
 
         const ws = await resizeImageStream(blobStream, { width, height });
         res.setHeader('Content-Type', 'image/webp');
