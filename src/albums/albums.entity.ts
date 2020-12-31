@@ -13,10 +13,12 @@ import { AlbumPic } from './albums.pic.entity';
 
 @Entity()
 export class Album {
-  @PrimaryColumn({ type: 'string', length: 21 })
+  @PrimaryColumn({ type: 'varchar', length: 21 })
   _id: string;
   @BeforeInsert()
-  setId() { this._id = nanoid() }
+  setId() {
+    this._id = nanoid();
+  }
 
   @Column()
   title: string;

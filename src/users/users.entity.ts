@@ -4,10 +4,12 @@ import { BeforeInsert, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryColumn({ type: 'string', length: 21 })
+  @PrimaryColumn({ type: 'varchar', length: 21 })
   _id: string;
   @BeforeInsert()
-  setId() { this._id = nanoid() }
+  setId() {
+    this._id = nanoid();
+  }
 
   @Column()
   fullName: string;
