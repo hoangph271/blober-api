@@ -27,13 +27,13 @@ export class SeederService {
   async seed() {
     console.info(`Seedin'...!`);
 
-    console.time('Seed albums');
-    await this.seedAlbums();
-    console.timeEnd('Seed albums');
-
     console.time('Seed users');
     await this.seedUsers();
     console.timeEnd('Seed users');
+
+    console.time('Seed albums');
+    await this.seedAlbums();
+    console.timeEnd('Seed albums');
   }
 
   async seedUsers() {
