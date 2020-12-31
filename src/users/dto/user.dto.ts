@@ -1,14 +1,14 @@
 export class UserDto {
-  uuid: string;
+  _id: string;
   fullName: string;
   username: string;
   isActive: boolean;
 
   static buildPurified(dirtyUser: UserDto): UserDto {
-    const { uuid, isActive, username, fullName } = dirtyUser;
+    const { _id, isActive, username, fullName } = dirtyUser;
 
     return {
-      uuid,
+      _id,
       isActive,
       username,
       fullName,

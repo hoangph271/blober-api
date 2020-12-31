@@ -1,11 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, PrimaryColumn } from 'typeorm';
 import { IsNotEmpty } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
+import { nanoid } from 'nanoid';
 
 @Entity()
 export class Blob {
-  @PrimaryGeneratedColumn('uuid')
-  uuid: string;
+  @PrimaryColumn({ type: 'string', length: 21 })
+  _id: string;
+  @BeforeInsert()
+  setId() { this._id = nanoid() }
 
   @Exclude()
   @IsNotEmpty()

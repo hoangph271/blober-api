@@ -1,18 +1,22 @@
 import { Exclude, Expose } from 'class-transformer';
 import { IsPositive } from 'class-validator';
+import { nanoid } from 'nanoid';
 import {
+  BeforeInsert,
   Column,
   Entity,
   JoinTable,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
 } from 'typeorm';
 import { AlbumPic } from './albums.pic.entity';
 
 @Entity()
 export class Album {
-  @PrimaryGeneratedColumn('uuid')
-  uuid: string;
+  @PrimaryColumn({ type: 'string', length: 21 })
+  _id: string;
+  @BeforeInsert()
+  setId() { this._id = nanoid() }
 
   @Column()
   title: string;
@@ -29,12 +33,12 @@ export class Album {
   @Expose({ name: 'pics' })
   get albumPics() {
     return this.pics.map((pic) => {
-      const { uuid, title, blobUuid } = pic;
+      const { _id, title, blobId } = pic;
 
       return {
-        uuid,
+        _id,
         title,
-        url: `blobs/raw/${blobUuid}`,
+        url: `blobs/raw/${blobId}`,
       };
     });
   }

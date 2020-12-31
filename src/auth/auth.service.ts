@@ -4,7 +4,7 @@ import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 
 export class AuthPayload {
-  uuid: string;
+  _id: string;
   roles: string[];
 }
 @Injectable()
@@ -27,15 +27,15 @@ export class AuthService {
     if (!isSuccess) return null;
 
     return {
-      uuid: dbUser.uuid,
+      _id: dbUser._id,
       roles: [], // TODO: Read from DB
     };
   }
 
   async login(@Request() req) {
-    const { uuid, roles } = req.user;
+    const { _id, roles } = req.user;
     const payload: AuthPayload = {
-      uuid,
+      _id,
       roles,
     };
 

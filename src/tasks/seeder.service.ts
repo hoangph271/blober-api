@@ -67,7 +67,7 @@ export class SeederService {
 
           // Create the album
           const {
-            identifiers: [{ uuid: albumUuid }],
+            identifiers: [{ _id: albumId }],
           } = await this.albumsService.create({
             title,
             picsCount,
@@ -78,7 +78,7 @@ export class SeederService {
             const { format, width, height } = await imageMetadata(blobPath);
             const contentType = `image/${format}`;
             const {
-              identifiers: [{ uuid: blobUuid }],
+              identifiers: [{ _id: blobId }],
             } = await this.blobsService.create({
               blobPath,
               fileName: path.basename(blobPath),
@@ -88,8 +88,8 @@ export class SeederService {
             });
 
             await this.albumPicsService.create({
-              album: { uuid: albumUuid },
-              blobUuid,
+              album: { _id: albumId },
+              blobId,
               title: path.basename(blobPath),
             });
           });

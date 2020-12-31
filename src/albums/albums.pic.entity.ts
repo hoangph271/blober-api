@@ -1,22 +1,26 @@
+import { nanoid } from 'nanoid';
 import {
+  BeforeInsert,
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
 } from 'typeorm';
 import { Album } from './albums.entity';
 
 @Entity()
 export class AlbumPic {
-  @PrimaryGeneratedColumn('uuid')
-  uuid: string;
+  @PrimaryColumn({ type: 'string', length: 21 })
+  _id: string;
+  @BeforeInsert()
+  setId() { this._id = nanoid() }
 
   @Column()
   title: string;
 
   @Column()
-  blobUuid: string;
+  blobId: string;
 
   @ManyToOne(() => Album)
   @JoinColumn()

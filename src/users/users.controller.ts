@@ -23,9 +23,9 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async findOne(@Request() req) {
-    const { uuid } = req.user;
+    const { _id } = req.user;
 
-    const user = await this.usersService.findOneBy({ uuid });
+    const user = await this.usersService.findOneBy({ _id });
 
     if (!user) throw new NotFoundException();
 
@@ -48,10 +48,10 @@ export class UsersController {
     if (!insertCount)
       return new HttpException('username already in used', HttpStatus.CONFLICT);
 
-    const { uuid, isActive } = generatedMaps[0];
+    const { _id, isActive } = generatedMaps[0];
 
     return UserDto.buildPurified({
-      uuid,
+      _id,
       isActive,
       ...createUserDto,
     });
