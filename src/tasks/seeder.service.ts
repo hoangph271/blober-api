@@ -3,7 +3,7 @@ import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as pLimit from 'p-limit';
 import { Injectable } from '@nestjs/common';
-import { okOrDefault } from '../utils/helper';
+import { hashPassword, okOrDefault } from '../utils/helper';
 import { imageMetadata } from '../utils/image';
 import { AlbumsService } from '../albums/albums.service';
 import { AlbumPicsService } from '../albums/albums.pic.service';
@@ -40,7 +40,7 @@ export class SeederService {
     this.usersService.create({
       fullName: 'fullName',
       username: 'username',
-      password: 'password',
+      password: await hashPassword('password'),
       isActive: true,
     });
   }

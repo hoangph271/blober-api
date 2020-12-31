@@ -1,3 +1,6 @@
+import * as bcrypt from 'bcryptjs';
+import { HASH_ROUNDS } from './env';
+
 type okOrDefaultParams = {
   func(): void;
   onError?(error: Error): void;
@@ -14,4 +17,8 @@ export function okOrDefault({
     onError && onError(error);
     return defaultValue;
   }
+}
+
+export async function hashPassword(password: string) {
+  return bcrypt.hash(password, HASH_ROUNDS);
 }

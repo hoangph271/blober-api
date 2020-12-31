@@ -1,4 +1,5 @@
 import {
+  ClassSerializerInterceptor,
   Controller,
   Get,
   NotFoundException,
@@ -6,6 +7,7 @@ import {
   Query,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { resizeImageStream } from '../utils/image';
@@ -17,15 +19,13 @@ export class BlobsController {
   constructor(private blobsService: BlobsService) {}
   @Get(':uuid')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
   async findBlob(@Param('uuid') uuid: string) {
     const blob = await this.blobsService.findOne(uuid);
 
     if (!blob) throw new NotFoundException();
 
-    return {
-      ...blob,
-      metadata: JSON.parse(blob.metadata),
-    };
+    return blob;
   }
 
   @Get('raw/:uuid')
