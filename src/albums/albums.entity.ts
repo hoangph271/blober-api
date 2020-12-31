@@ -28,14 +28,14 @@ export class Album {
 
   @Expose({ name: 'pics' })
   get albumPics() {
-    return this.pics.map(pic => {
-      const { uuid, title, blobUuid } = pic
+    return this.pics.map((pic) => {
+      const { uuid, title, blobUuid } = pic;
 
       return {
         uuid,
         title,
-        url: `blobs/raw/${blobUuid}`
-      }
-    })
+        url: `blobs/raw/${blobUuid}`,
+      };
+    });
   }
 }

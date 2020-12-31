@@ -52,7 +52,7 @@ export class BlobsController {
         size = size || JSON.parse(blob.metadata).size;
 
         const [width, height] = size
-          ? size.split('x').map(val => val ? Number(val) : undefined)
+          ? size.split('x').map((val) => (val ? Number(val) : undefined))
           : [];
 
         const ws = await resizeImageStream(blobStream, { width, height });

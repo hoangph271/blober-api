@@ -9,6 +9,7 @@ import { AlbumsModule } from './albums/albums.module';
 import { BlobsModule } from './blobs/blobs.module';
 import { AlbumPic } from './albums/albums.pic.entity';
 import { DATABASE } from './utils/env';
+import { TasksModule } from './tasks/tasks.module';
 
 const dbConfigs: TypeOrmModuleOptions = {
   type: 'sqlite',
@@ -23,6 +24,7 @@ const dbConfigs: TypeOrmModuleOptions = {
     AuthModule,
     AlbumsModule,
     BlobsModule,
+    TasksModule,
   ],
   providers: [],
 })

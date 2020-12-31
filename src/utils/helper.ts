@@ -3,7 +3,11 @@ type okOrDefaultParams = {
   onError?(error: Error): void;
   defaultValue?: any;
 };
-export function okOrDefault({ func, onError, defaultValue = {} }: okOrDefaultParams) {
+export function okOrDefault({
+  func,
+  onError,
+  defaultValue = {},
+}: okOrDefaultParams) {
   try {
     return func();
   } catch (error) {
