@@ -1,12 +1,12 @@
 export class AlbumDto {
-  uuid: string;
+  _id: string;
   title: string;
 
   static buildPurified(dirtyAlbum: AlbumDto): AlbumDto {
-    const { uuid, title } = dirtyAlbum;
+    const { _id, title } = dirtyAlbum;
 
     return {
-      uuid,
+      _id,
       title,
     };
   }

@@ -1,10 +1,13 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { nanoid } from 'nanoid';
+import { BeforeInsert, Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  uuid: string;
+  @PrimaryColumn({ type: 'string', length: 21 })
+  _id: string;
+  @BeforeInsert()
+  setId() { this._id = nanoid() }
 
   @Column()
   fullName: string;

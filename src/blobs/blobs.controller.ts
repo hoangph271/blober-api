@@ -17,25 +17,25 @@ import { BlobsService } from './blobs.service';
 @Controller('blobs')
 export class BlobsController {
   constructor(private blobsService: BlobsService) {}
-  @Get(':uuid')
+  @Get(':_id')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
-  async findBlob(@Param('uuid') uuid: string) {
-    const blob = await this.blobsService.findOne(uuid);
+  async findBlob(@Param('_id') _id: string) {
+    const blob = await this.blobsService.findOne(_id);
 
     if (!blob) throw new NotFoundException();
 
     return blob;
   }
 
-  @Get('raw/:uuid')
+  @Get('raw/:_id')
   @UseGuards(JwtAuthGuard)
   async readBlob(
-    @Param('uuid') uuid: string,
+    @Param('_id') _id: string,
     @Query('size') size: string,
     @Res() res: Response,
   ) {
-    const blob = await this.blobsService.findOne(uuid);
+    const blob = await this.blobsService.findOne(_id);
 
     if (!blob) throw new NotFoundException();
 
