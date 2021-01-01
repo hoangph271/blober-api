@@ -1,7 +1,9 @@
 {
   "type": "sqlite",
-  "database": "db.db",
+  "database": "blober.db",
+  "synchronize": true,
   "cli": {
     "migrationsDir": "src/migrations"
-  }
+  },
+  "entities": ["dist/**/*.entity{.ts,.js}"]
 }
