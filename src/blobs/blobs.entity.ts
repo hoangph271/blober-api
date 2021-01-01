@@ -14,6 +14,15 @@ export class Blob {
   _id: string;
 
   @Exclude()
+  @Column({ nullable: true })
+  ownerId: string;
+
+  @Expose()
+  get isPublic() {
+    return !this.ownerId;
+  }
+
+  @Exclude()
   @IsNotEmpty()
   @Column()
   blobPath: string;

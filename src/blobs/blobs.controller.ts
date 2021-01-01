@@ -1,10 +1,12 @@
 import {
   ClassSerializerInterceptor,
   Controller,
+  ForbiddenException,
   Get,
   NotFoundException,
   Param,
   Query,
+  Request,
   Res,
   UseGuards,
   UseInterceptors,
@@ -20,10 +22,14 @@ export class BlobsController {
   @Get(':_id')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
-  async findBlob(@Param('_id') _id: string) {
+  async findBlob(@Param('_id') _id: string, @Request() req) {
     const blob = await this.blobsService.findOne(_id);
 
     if (!blob) throw new NotFoundException();
+
+    if (blob.ownerId && blob.ownerId !== req.user._id) {
+      throw new ForbiddenException();
+    }
 
     return blob;
   }
@@ -34,14 +40,20 @@ export class BlobsController {
     @Param('_id') _id: string,
     @Query('size') size: string,
     @Res() res: Response,
+    @Request() req,
   ) {
     const blob = await this.blobsService.findOne(_id);
 
     if (!blob) throw new NotFoundException();
 
+    if (blob.ownerId && blob.ownerId !== req.user._id) {
+      throw new ForbiddenException();
+    }
+
     const blobStream = await this.blobsService.createReadStream(blob);
 
     if (!blobStream) throw new NotFoundException();
+
     res.setHeader(
       'Content-Disposition',
       `attachment; filename="${blob.fileName}"`,

@@ -20,6 +20,15 @@ export class Album {
     this._id = nanoid();
   }
 
+  @Exclude()
+  @Column({ nullable: true })
+  ownerId: string;
+
+  @Expose()
+  get isPublic() {
+    return !this.ownerId;
+  }
+
   @Column()
   title: string;
 

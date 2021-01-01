@@ -28,24 +28,48 @@ export class SeederService {
     console.info(`Seedin'...!`);
 
     console.time('Seed users');
-    await this.seedUsers();
+    const [user] = await this.seedUsers();
     console.timeEnd('Seed users');
 
     console.time('Seed albums');
-    await this.seedAlbums();
+    await this.seedAlbums(user._id);
     console.timeEnd('Seed albums');
   }
 
   async seedUsers() {
-    this.usersService.create({
-      fullName: 'fullName',
-      username: 'username',
-      password: await hashPassword('password'),
-      isActive: true,
-    });
+    const users = [
+      {
+        fullName: 'fullName',
+        username: 'username',
+        password: await hashPassword('password'),
+        isActive: true,
+      },
+    ];
+
+    return Promise.all(
+      users.map(async (user) => {
+        const existedUser = await this.usersService.findOneBy({
+          username: user.username,
+        });
+
+        if (existedUser) return existedUser;
+
+        const { identifiers } = await this.usersService.create({
+          fullName: 'fullName',
+          username: 'username',
+          password: await hashPassword('password'),
+          isActive: true,
+        });
+
+        return {
+          ...user,
+          _id: identifiers[0]._id,
+        };
+      }),
+    );
   }
 
-  async seedAlbums(limit = 10) {
+  async seedAlbums(ownerId, limit = 10) {
     const albumPaths = (await childPaths(ALBUM_DIR)).slice(0, limit);
 
     await Promise.all([
@@ -55,6 +79,13 @@ export class SeederService {
           const picPaths = (await childPaths(dirPath)).filter(
             (fileName) => !fileName.endsWith(DATA_FILE),
           );
+          const existedAlbumPic = await this.blobsService.findOneBy({
+            blobPath: picPaths[0],
+          });
+
+          if (existedAlbumPic) {
+            return console.info(`Album existed: ${dirPath}...!`);
+          }
 
           const json = await fs.readFile(dataPath, 'utf-8');
           const picsCount = picPaths.length - 1;
@@ -69,6 +100,7 @@ export class SeederService {
           const {
             identifiers: [{ _id: albumId }],
           } = await this.albumsService.create({
+            ownerId,
             title,
             picsCount,
           });
@@ -80,6 +112,7 @@ export class SeederService {
             const {
               identifiers: [{ _id: blobId }],
             } = await this.blobsService.create({
+              ownerId,
               blobPath,
               fileName: path.basename(blobPath),
               fileSize: (await fs.stat(blobPath)).size,
