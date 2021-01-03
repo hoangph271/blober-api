@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
-import { BlobsModule } from '../blobs/blobs.module';
-import { AlbumsModule } from '../albums/albums.module';
-import { SeederService } from './seeder.service';
-import { UsersModule } from '../users/users.module';
+import { Module } from '@nestjs/common'
+import { BlobsModule } from '../blobs/blobs.module'
+import { AlbumsModule } from '../albums/albums.module'
+import { SeederService } from './seeder.service'
+import { UsersModule } from '../users/users.module'
 
 @Module({
   imports: [AlbumsModule, BlobsModule, UsersModule],

@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { DbService } from '../db.service';
-import { AlbumPic } from './albums.pic.entity';
+import { Injectable } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
+import { DbService } from '../db.service'
+import { AlbumPic } from './albums.pic.entity'
 
 @Injectable()
 export class AlbumPicsService extends DbService<AlbumPic> {
@@ -10,6 +10,6 @@ export class AlbumPicsService extends DbService<AlbumPic> {
     @InjectRepository(AlbumPic)
     albumRepository: Repository<AlbumPic>,
   ) {
-    super(albumRepository);
+    super(albumRepository)
   }
 }

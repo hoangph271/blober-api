@@ -1,19 +1,19 @@
-import * as path from 'path';
-import * as fs from 'fs/promises';
-import * as os from 'os';
-import * as pLimit from 'p-limit';
-import { Injectable } from '@nestjs/common';
-import { hashPassword, okOrDefault } from '../utils/helper';
-import { imageMetadata } from '../utils/image';
-import { AlbumsService } from '../albums/albums.service';
-import { AlbumPicsService } from '../albums/albums.pic.service';
-import { BlobsService } from '../blobs/blobs.service';
-import { UsersService } from '../users/users.service';
+import * as path from 'path'
+import * as fs from 'fs/promises'
+import * as os from 'os'
+import * as pLimit from 'p-limit'
+import { Injectable } from '@nestjs/common'
+import { hashPassword, okOrDefault } from '../utils/helper'
+import { imageMetadata } from '../utils/image'
+import { AlbumsService } from '../albums/albums.service'
+import { AlbumPicsService } from '../albums/albums.pic.service'
+import { BlobsService } from '../blobs/blobs.service'
+import { UsersService } from '../users/users.service'
 
-const THREADS_PER_CPU = 4;
-const limiter = pLimit(os.cpus().length * THREADS_PER_CPU);
-const ALBUM_DIR = 'Z:\\useShared\\useBad\\_savior\\posts';
-const DATA_FILE = 'info.json';
+const THREADS_PER_CPU = 4
+const limiter = pLimit(os.cpus().length * THREADS_PER_CPU)
+const ALBUM_DIR = 'Z:\\useShared\\useBad\\_savior\\posts'
+const DATA_FILE = 'info.json'
 
 @Injectable()
 export class SeederService {
@@ -25,15 +25,15 @@ export class SeederService {
   ) {}
 
   async seed() {
-    console.info(`Seedin'...!`);
+    console.info(`Seedin'...!`)
 
-    console.time('Seed users');
-    const [user] = await this.seedUsers();
-    console.timeEnd('Seed users');
+    console.time('Seed users')
+    const [user] = await this.seedUsers()
+    console.timeEnd('Seed users')
 
-    console.time('Seed albums');
-    await this.seedAlbums(user._id);
-    console.timeEnd('Seed albums');
+    console.time('Seed albums')
+    await this.seedAlbums(user._id)
+    console.timeEnd('Seed albums')
   }
 
   async seedUsers() {
@@ -44,57 +44,57 @@ export class SeederService {
         password: await hashPassword('password'),
         isActive: true,
       },
-    ];
+    ]
 
     return Promise.all(
       users.map(async (user) => {
         const existedUser = await this.usersService.findOneBy({
           username: user.username,
-        });
+        })
 
-        if (existedUser) return existedUser;
+        if (existedUser) return existedUser
 
         const { identifiers } = await this.usersService.create({
           fullName: 'fullName',
           username: 'username',
           password: await hashPassword('password'),
           isActive: true,
-        });
+        })
 
         return {
           ...user,
           _id: identifiers[0]._id,
-        };
+        }
       }),
-    );
+    )
   }
 
   async seedAlbums(ownerId, limit = 10) {
-    const albumPaths = (await childPaths(ALBUM_DIR)).slice(0, limit);
+    const albumPaths = (await childPaths(ALBUM_DIR)).slice(0, limit)
 
     await Promise.all([
       ...albumPaths.map((dirPath) =>
         limiter(async () => {
-          const dataPath = path.join(dirPath, DATA_FILE);
+          const dataPath = path.join(dirPath, DATA_FILE)
           const picPaths = (await childPaths(dirPath)).filter(
             (fileName) => !fileName.endsWith(DATA_FILE),
-          );
+          )
           const existedAlbumPic = await this.blobsService.findOneBy({
             blobPath: picPaths[0],
-          });
+          })
 
           if (existedAlbumPic) {
-            return console.info(`Album existed: ${dirPath}...!`);
+            return console.info(`Album existed: ${dirPath}...!`)
           }
 
-          const json = await fs.readFile(dataPath, 'utf-8');
-          const picsCount = picPaths.length - 1;
+          const json = await fs.readFile(dataPath, 'utf-8')
+          const picsCount = picPaths.length - 1
           const { Title: title = 'N/A' } = okOrDefault({
             func: () => JSON.parse(json),
             onError: () => {
-              console.info(`Error parsing data file of ${dirPath}`);
+              console.info(`Error parsing data file of ${dirPath}`)
             },
-          });
+          })
 
           // Create the album
           const {
@@ -103,12 +103,12 @@ export class SeederService {
             ownerId,
             title,
             picsCount,
-          });
+          })
 
           // Create blobs & album pics
           const insertPromises = picPaths.map(async (blobPath) => {
-            const { format, width, height } = await imageMetadata(blobPath);
-            const contentType = `image/${format}`;
+            const { format, width, height } = await imageMetadata(blobPath)
+            const contentType = `image/${format}`
             const {
               identifiers: [{ _id: blobId }],
             } = await this.blobsService.create({
@@ -118,24 +118,24 @@ export class SeederService {
               fileSize: (await fs.stat(blobPath)).size,
               contentType,
               metadata: JSON.stringify({ size: `${width}x${height}` }),
-            });
+            })
 
             await this.albumPicsService.create({
               album: { _id: albumId },
               blobId,
               title: path.basename(blobPath),
-            });
-          });
+            })
+          })
 
-          await Promise.all(insertPromises);
+          await Promise.all(insertPromises)
         }),
       ),
-    ]);
+    ])
   }
 }
 
 async function childPaths(dirPath: string) {
-  const childNames = await fs.readdir(dirPath);
+  const childNames = await fs.readdir(dirPath)
 
-  return childNames.map((fileName) => path.join(dirPath, fileName));
+  return childNames.map((fileName) => path.join(dirPath, fileName))
 }

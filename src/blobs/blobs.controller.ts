@@ -10,11 +10,11 @@ import {
   Res,
   UseGuards,
   UseInterceptors,
-} from '@nestjs/common';
-import { Response } from 'express';
-import { resizeImageStream } from '../utils/image';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { BlobsService } from './blobs.service';
+} from '@nestjs/common'
+import { Response } from 'express'
+import { resizeImageStream } from '../utils/image'
+import { JwtAuthGuard } from '../auth/jwt-auth.guard'
+import { BlobsService } from './blobs.service'
 
 @Controller('blobs')
 export class BlobsController {
@@ -23,15 +23,15 @@ export class BlobsController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   async findBlob(@Param('_id') _id: string, @Request() req) {
-    const blob = await this.blobsService.findOne(_id);
+    const blob = await this.blobsService.findOne(_id)
 
-    if (!blob) throw new NotFoundException();
+    if (!blob) throw new NotFoundException()
 
     if (blob.ownerId && blob.ownerId !== req.user._id) {
-      throw new ForbiddenException();
+      throw new ForbiddenException()
     }
 
-    return blob;
+    return blob
   }
 
   @Get('raw/:_id')
@@ -42,40 +42,40 @@ export class BlobsController {
     @Res() res: Response,
     @Request() req,
   ) {
-    const blob = await this.blobsService.findOne(_id);
+    const blob = await this.blobsService.findOne(_id)
 
-    if (!blob) throw new NotFoundException();
+    if (!blob) throw new NotFoundException()
 
     if (blob.ownerId && blob.ownerId !== req.user._id) {
-      throw new ForbiddenException();
+      throw new ForbiddenException()
     }
 
-    const blobStream = await this.blobsService.createReadStream(blob);
+    const blobStream = await this.blobsService.createReadStream(blob)
 
-    if (!blobStream) throw new NotFoundException();
+    if (!blobStream) throw new NotFoundException()
 
     res.setHeader(
       'Content-Disposition',
       `attachment; filename="${blob.fileName}"`,
-    );
+    )
 
     switch (true) {
       case blob.contentType.startsWith('image'): {
-        size = size || JSON.parse(blob.metadata).size;
+        size = size || JSON.parse(blob.metadata).size
 
         const [width, height] = size
           ? size.split('x').map((val) => (val ? Number(val) : undefined))
-          : [];
+          : []
 
-        const ws = await resizeImageStream(blobStream, { width, height });
-        res.setHeader('Content-Type', 'image/webp');
-        ws.pipe(res);
+        const ws = await resizeImageStream(blobStream, { width, height })
+        res.setHeader('Content-Type', 'image/webp')
+        ws.pipe(res)
 
-        break;
+        break
       }
       default: {
-        res.setHeader('Content-Type', 'application/octet-stream');
-        blobStream.pipe(res);
+        res.setHeader('Content-Type', 'application/octet-stream')
+        blobStream.pipe(res)
       }
     }
   }

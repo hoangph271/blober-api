@@ -1,4 +1,4 @@
-import { nanoid } from 'nanoid';
+import { nanoid } from 'nanoid'
 import {
   BeforeInsert,
   Column,
@@ -6,25 +6,25 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
-} from 'typeorm';
-import { Album } from './albums.entity';
+} from 'typeorm'
+import { Album } from './albums.entity'
 
 @Entity()
 export class AlbumPic {
   @PrimaryColumn({ type: 'varchar', length: 21 })
-  _id: string;
+  _id: string
   @BeforeInsert()
   setId() {
-    this._id = nanoid();
+    this._id = nanoid()
   }
 
   @Column()
-  title: string;
+  title: string
 
   @Column()
-  blobId: string;
+  blobId: string
 
   @ManyToOne(() => Album)
   @JoinColumn()
-  album: Album;
+  album: Album
 }
