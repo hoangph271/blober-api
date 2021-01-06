@@ -3,17 +3,16 @@ import * as fs from 'fs/promises'
 import * as os from 'os'
 import * as pLimit from 'p-limit'
 import { Injectable } from '@nestjs/common'
-import { hashPassword, okOrDefault } from '../utils/helper'
+import { hashPassword, okOrDefault, walkDir } from '../utils/helper'
 import { imageMetadata } from '../utils/image'
 import { AlbumsService } from '../albums/albums.service'
 import { AlbumPicsService } from '../albums/albums.pic.service'
 import { BlobsService } from '../blobs/blobs.service'
 import { UsersService } from '../users/users.service'
+import { ALBUM_DIR, POST_DATA_FILE, FILE_DIRS } from '../utils/env'
 
 const THREADS_PER_CPU = 4
 const limiter = pLimit(os.cpus().length * THREADS_PER_CPU)
-const ALBUM_DIR = 'Z:\\useShared\\useBad\\_savior\\posts'
-const DATA_FILE = 'info.json'
 
 @Injectable()
 export class SeederService {
@@ -31,9 +30,13 @@ export class SeederService {
     const [user] = await this.seedUsers()
     console.timeEnd('Seed users')
 
-    console.time('Seed albums')
-    await this.seedAlbums(user._id)
-    console.timeEnd('Seed albums')
+    // console.time('Seed albums')
+    // await this.seedAlbums(user._id)
+    // console.timeEnd('Seed albums')
+
+    console.time('Seed videos')
+    await this.seedVideos(user._id)
+    console.timeEnd('Seed videos')
   }
 
   async seedUsers() {
@@ -75,9 +78,9 @@ export class SeederService {
     await Promise.all([
       ...albumPaths.map((dirPath) =>
         limiter(async () => {
-          const dataPath = path.join(dirPath, DATA_FILE)
+          const dataPath = path.join(dirPath, POST_DATA_FILE)
           const picPaths = (await childPaths(dirPath)).filter(
-            (fileName) => !fileName.endsWith(DATA_FILE),
+            (fileName) => !fileName.endsWith(POST_DATA_FILE),
           )
           const existedAlbumPic = await this.blobsService.findOneBy({
             blobPath: picPaths[0],
@@ -131,6 +134,16 @@ export class SeederService {
         }),
       ),
     ])
+  }
+
+  async seedVideos(ownerId, limit = 10) {
+    for (const dirPath of FILE_DIRS) {
+      let filesCount = 0
+      for await (const _ of await walkDir(dirPath)) {
+        filesCount += 1
+      }
+      console.info(filesCount)
+    }
   }
 }
 
