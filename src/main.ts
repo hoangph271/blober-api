@@ -4,6 +4,7 @@ dotenv.config()
 import * as fs from 'fs'
 import { ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
+import * as cookieParser from 'cookie-parser'
 import { AppModule } from './app.module'
 import { SeederService } from './tasks/seeder.service'
 import { TasksModule } from './tasks/tasks.module'
@@ -31,6 +32,7 @@ const { USE_SEEDERS, DROP_DB } = process.env
   const app = await NestFactory.create(AppModule)
   app.useGlobalPipes(new ValidationPipe())
   app.enableCors()
+  app.use(cookieParser())
 
   await app.listen(3000)
 })()

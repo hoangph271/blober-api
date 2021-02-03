@@ -27,6 +27,12 @@ export abstract class DbService<Entity> {
     return this.entityRepository.insert(entity)
   }
 
+  async countBy(where: FindManyOptions<Entity>) {
+    return this.entityRepository.count({
+      where,
+    })
+  }
+
   async DANGEROUS_deleteAll() {
     return this.entityRepository.delete({})
   }

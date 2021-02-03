@@ -21,9 +21,15 @@ export class AlbumsController {
     @Query('skip') skip = '0',
     @Query('take') take = DEFAULT_TAKE_COUNT,
   ) {
-    return await this.albumsService.findManyBy({
+    const albums = await this.albumsService.findManyBy({
       skip: Number(skip),
       take: Number(take),
     })
+    const itemCount = await this.albumsService.countBy({})
+
+    return {
+      itemCount,
+      items: albums,
+    }
   }
 }

@@ -30,9 +30,9 @@ export class SeederService {
     const [user] = await this.seedUsers()
     console.timeEnd('Seed users')
 
-    // console.time('Seed albums')
-    // await this.seedAlbums(user._id)
-    // console.timeEnd('Seed albums')
+    console.time('Seed albums')
+    await this.seedAlbums(user._id)
+    console.timeEnd('Seed albums')
 
     console.time('Seed videos')
     await this.seedVideos(user._id)
@@ -72,7 +72,7 @@ export class SeederService {
     )
   }
 
-  async seedAlbums(ownerId, limit = 10) {
+  async seedAlbums(ownerId, limit = 100) {
     const albumPaths = (await childPaths(ALBUM_DIR)).slice(0, limit)
 
     await Promise.all([
