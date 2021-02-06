@@ -30,6 +30,7 @@ const { USE_SEEDERS, DROP_DB } = process.env
   }
 
   const app = await NestFactory.create(AppModule)
+  app.setGlobalPrefix('api/v1')
   app.useGlobalPipes(new ValidationPipe())
   app.enableCors()
   app.use(cookieParser())
