@@ -1,11 +1,4 @@
-import {
-  ClassSerializerInterceptor,
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common'
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
 import { DEFAULT_TAKE_COUNT } from '../utils/env'
 import { JwtAuthGuard } from '../auth/jwt-auth.guard'
 import { AlbumsService } from './albums.service'
@@ -16,7 +9,6 @@ export class AlbumsController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(ClassSerializerInterceptor)
   async findAlbums(
     @Query('skip') skip = '0',
     @Query('take') take = DEFAULT_TAKE_COUNT,
@@ -31,5 +23,13 @@ export class AlbumsController {
       itemCount,
       items: albums,
     }
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async findAlbum(@Param('id') id: string) {
+    const album = await this.albumsService.findOne(id)
+
+    return album
   }
 }

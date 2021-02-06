@@ -40,17 +40,4 @@ export class Album {
   @OneToMany(() => AlbumPic, (albumPic) => albumPic.album, { eager: true })
   @JoinTable()
   pics: AlbumPic[]
-
-  @Expose({ name: 'pics' })
-  get albumPics() {
-    return this.pics.map((pic) => {
-      const { _id, title, blobId } = pic
-
-      return {
-        _id,
-        title,
-        url: `blobs/raw/${blobId}`,
-      }
-    })
-  }
 }
