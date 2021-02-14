@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module'
 import { AlbumsModule } from './albums/albums.module'
 import { BlobsModule } from './blobs/blobs.module'
 import { TasksModule } from './tasks/tasks.module'
+import { FilesModule } from './files/files.module'
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { TasksModule } from './tasks/tasks.module'
     AlbumsModule,
     BlobsModule,
     TasksModule,
+    FilesModule,
   ],
   providers: [],
 })
