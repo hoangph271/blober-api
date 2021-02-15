@@ -53,6 +53,22 @@ export class FilesService {
     )
   }
 
+  async getStats(itemPath: string) {
+    return fs.stat(itemPath)
+  }
+
+  async getContentType(itemPath: string) {
+    const { mime = '' } = (await fileType.fromFile(itemPath)) || {}
+
+    return mime
+  }
+
+  getFileReadable(itemPath: string, partial?: { start: number; end: number }) {
+    return partial
+      ? createReadStream(itemPath, { ...partial })
+      : createReadStream(itemPath)
+  }
+
   async previewStream(
     itemPath: string,
   ): Promise<{
