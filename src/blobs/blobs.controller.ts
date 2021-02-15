@@ -67,9 +67,9 @@ export class BlobsController {
           ? size.split('x').map((val) => (val ? Number(val) : undefined))
           : []
 
-        const ws = await resizeImageStream(blobStream, { width, height })
+        const rs = await resizeImageStream(blobStream, { width, height })
         res.setHeader('Content-Type', 'image/webp')
-        ws.pipe(res)
+        rs.pipe(res)
 
         break
       }
