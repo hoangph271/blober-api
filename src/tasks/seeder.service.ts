@@ -3,13 +3,13 @@ import * as fs from 'fs/promises'
 import * as os from 'os'
 import * as pLimit from 'p-limit'
 import { Injectable } from '@nestjs/common'
-import { hashPassword, okOrDefault, walkDir } from '../utils/helper'
+import { hashPassword, okOrDefault } from '../utils/helper'
 import { imageMetadata } from '../utils/image'
 import { AlbumsService } from '../albums/albums.service'
 import { AlbumPicsService } from '../albums/albums.pic.service'
 import { BlobsService } from '../blobs/blobs.service'
 import { UsersService } from '../users/users.service'
-import { ALBUM_DIR, POST_DATA_FILE, FILE_DIRS } from '../utils/env'
+import { ALBUM_DIR, POST_DATA_FILE } from '../utils/env'
 
 const THREADS_PER_CPU = 4
 const limiter = pLimit(os.cpus().length * THREADS_PER_CPU)
@@ -34,9 +34,9 @@ export class SeederService {
     await this.seedAlbums(user._id)
     console.timeEnd('Seed albums')
 
-    console.time('Seed videos')
-    await this.seedVideos(user._id)
-    console.timeEnd('Seed videos')
+    // console.time('Seed videos')
+    // await this.seedVideos()
+    // console.timeEnd('Seed videos')
   }
 
   async seedUsers() {
@@ -136,14 +136,14 @@ export class SeederService {
     ])
   }
 
-  async seedVideos(ownerId, limit = 10) {
-    for (const dirPath of FILE_DIRS) {
-      let filesCount = 0
-      for await (const _ of await walkDir(dirPath)) {
-        filesCount += 1
-      }
-      console.info(filesCount)
-    }
+  async seedVideos() {
+    // for (const dirPath of FILE_DIRS) {
+    //   let filesCount = 0
+    //   for await (const _ of await walkDir(dirPath)) {
+    //     filesCount += 1
+    //   }
+    //   console.info(filesCount)
+    // }
   }
 }
 

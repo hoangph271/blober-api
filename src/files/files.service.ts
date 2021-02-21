@@ -7,37 +7,21 @@ import { createReadStream } from 'fs'
 import * as fileType from 'file-type'
 import { spawn } from 'child_process'
 import * as fsWalk from '@nodelib/fs.walk'
+import * as sharp from 'sharp'
 import { Injectable, Logger } from '@nestjs/common'
-import { FS_ROOTS } from '../utils/env'
+import { FS_ROOT } from '../utils/env'
 
 const CACHE_DIR = path.join('.fs_cache')
 fs.access(CACHE_DIR, fsSync.constants.F_OK).catch(() => {
   fs.mkdir(CACHE_DIR)
 })
 
-const hash = (inStr: string) =>
-  crypto.createHash('sha256').update(inStr).digest('hex')
-
-const getRelativePath = (fullPath: string) => {
-  const rootPath = FS_ROOTS.find((root) => fullPath.startsWith(root))
-
-  return fullPath.replace(rootPath, '')
+const hash = (inStr: string) => {
+  return crypto.createHash('sha256').update(inStr).digest('hex')
 }
 
-const fsRoot: FSItem = {
-  _id: '',
-  fullPath: '',
-  path: '',
-  mime: '',
-  isDir: true,
-  children: FS_ROOTS.map((path) => {
-    return {
-      _id: hash(path),
-      path,
-      isDir: true,
-      fullPath: path,
-    }
-  }),
+const getRelativePath = (fullPath: string) => {
+  return fullPath.replace(FS_ROOT, '')
 }
 
 type FSWalkEntry = {
@@ -57,28 +41,20 @@ export type FSItem = {
 @Injectable()
 export class FilesService {
   async findPath(_id: string): Promise<string | undefined> {
-    const fsItem = fsRoot.children.find((item) => item._id === _id)
+    const walkStream = fsWalk.walkStream(FS_ROOT, {
+      followSymbolicLinks: true,
+    })
 
-    if (fsItem) {
-      return fsItem.fullPath
-    }
+    for await (const entry of walkStream) {
+      const { path } = entry as FSWalkEntry
 
-    for (const fsItem of fsRoot.children) {
-      const walkStream = fsWalk.walkStream(fsItem.fullPath)
-
-      for await (const entry of walkStream) {
-        const { path } = entry as FSWalkEntry
-
-        if (_id === hash(path)) return path
+      if (_id === hash(path)) {
+        return path
       }
     }
   }
   async readPath(_id: string): Promise<FSItem | undefined> {
-    if (_id === '') {
-      return fsRoot
-    }
-
-    const fullPath = await this.findPath(_id)
+    const fullPath = _id === '' ? FS_ROOT : await this.findPath(_id)
 
     if (!fullPath) return
 
@@ -90,6 +66,7 @@ export class FilesService {
         fullPath,
         path: getRelativePath(fullPath),
         isDir: false,
+        size: stats.size,
         mime: await this.getContentType(fullPath),
         ...(await fileType.fromFile(fullPath)),
       }
@@ -105,6 +82,7 @@ export class FilesService {
 
           const fsItem: FSItem = {
             _id: hash(childPath),
+            size: stats.size,
             fullPath: childPath,
             path: getRelativePath(childPath),
             isDir: stats.isDirectory(),
@@ -172,8 +150,8 @@ export class FilesService {
     switch (true) {
       case mime.startsWith('image/'): {
         return {
-          rs: await fsSync.createReadStream(itemPath),
-          mime,
+          rs: await this._imagePreviewStream(itemPath),
+          mime: 'image/webp',
         }
       }
       case mime.startsWith('video/'): {
@@ -193,15 +171,43 @@ export class FilesService {
     }
   }
 
-  async _videoPreviewStream(
-    itemPath: string,
-  ): Promise<fsSync.ReadStream | null> {
+  async _getCached(itemPath: string): Promise<[boolean, string]> {
     const base64Path = Buffer.from(itemPath).toString('base64')
     const cachedPath = path.join(CACHE_DIR, base64Path)
     const existsCached = await fs
       .access(cachedPath, fsSync.constants.R_OK)
       .then(() => true)
       .catch(() => false)
+
+    return [existsCached, cachedPath]
+  }
+
+  async _imagePreviewStream(itemPath: string): Promise<Readable | null> {
+    const [existsCached, cachedPath] = await this._getCached(itemPath)
+
+    if (existsCached) {
+      return fsSync.createReadStream(cachedPath)
+    }
+
+    const rs = sharp(itemPath)
+      .resize({ width: 1024, height: 1024, fit: 'contain' })
+      .webp()
+
+    const ws = fsSync.createWriteStream(cachedPath)
+    rs.pipe(ws)
+
+    return new Promise((resolve, reject) => {
+      ws.once('finish', () => resolve(fsSync.createReadStream(cachedPath)))
+      ws.once('error', (e) => {
+        console.error(e)
+        console.error(`${itemPath}: ffmpeg failed with error ${e.message}`)
+        reject(e)
+      })
+    })
+  }
+
+  async _videoPreviewStream(itemPath: string): Promise<Readable | null> {
+    const [existsCached, cachedPath] = await this._getCached(itemPath)
 
     if (existsCached) {
       return fsSync.createReadStream(cachedPath)
